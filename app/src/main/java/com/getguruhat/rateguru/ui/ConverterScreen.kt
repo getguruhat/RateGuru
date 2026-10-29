@@ -35,12 +35,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -64,15 +62,8 @@ fun ConverterScreen(
 ) {
     val p = LocalPalette.current
     var mathMode by rememberSaveable { mutableStateOf(false) }
-    Box(Modifier.fillMaxSize().background(p.background)) {
-        // The icon's blue behind the title, running under the status bar; the card overlaps its bottom.
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(p.headerTop, p.headerBottom)))
-                .statusBarsPadding()
-                .height(118.dp),
-        )
+    // The whole screen sits on the backdrop gradient, under the status and navigation bars too.
+    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(p.backdropTop, p.backdropBottom)))) {
         BoxWithConstraints(
             Modifier
                 .fillMaxSize()
@@ -104,7 +95,6 @@ fun ConverterScreen(
                             }
                         }
                     }
-                    QuickMath(state)
                 }
 
                 Spacer(Modifier.height(10.dp))
@@ -140,11 +130,12 @@ private fun Header(state: ConverterState, onSettings: () -> Unit) {
     }
     Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("RateGuru", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text(status, color = Color.White.copy(alpha = 0.78f), fontSize = 13.sp)
+            Text("RateGuru", color = p.onBackdrop, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(status, color = p.onBackdrop.copy(alpha = 0.8f), fontSize = 13.sp)
+            QuickMath(state)
         }
         IconButton(onClick = onSettings) {
-            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
+            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = p.onBackdrop)
         }
     }
 }
@@ -215,16 +206,16 @@ private fun QuickMath(state: ConverterState) {
     if (state.active == state.home) return
     val rate = state.rates.convert(1.0, state.active, state.home) ?: return
     val tip = Calc.mentalMath(rate) ?: return
-    Row(
-        Modifier.fillMaxWidth().padding(top = 10.dp, start = 8.dp, end = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = p.accent, modifier = Modifier.size(15.dp))
-        Spacer(Modifier.width(6.dp))
+    Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = p.onBackdrop, modifier = Modifier.size(14.dp))
+        Spacer(Modifier.width(4.dp))
         Text(
-            "${state.active} to ${state.home} in your head: $tip",
-            color = p.secondary,
+            "${state.active} → ${state.home} in your head: $tip",
+            color = p.onBackdrop,
             fontSize = 13.sp,
+            fontWeight = FontWeight.Medium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
         )
     }
 }

@@ -10,12 +10,17 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * Colours taken from the app icon: its royal-blue gradient for the header and accent,
- * the arrow's gold for the calculator key, the ¥ coin's red for C. Light mode sits on a
- * pale blue-grey, dark mode on navy rather than black.
+ * GuruHat colours. Light mode puts the whole screen on the icon's orange gradient so the
+ * white cards and keys stand out; dark mode is GuruHat navy with orange accents.
  */
 data class Palette(
-    val background: Color,
+    /** Main screen backdrop, top to bottom. */
+    val backdropTop: Color,
+    val backdropBottom: Color,
+    /** Text and icons drawn straight on the backdrop (title, status, tip). */
+    val onBackdrop: Color,
+    /** Bottom sheets (currency list, settings). */
+    val sheet: Color,
     val card: Color,
     val label: Color,
     val secondary: Color,
@@ -25,47 +30,48 @@ data class Palette(
     val digitKey: Color,
     val functionKey: Color,
     val onFunctionKey: Color,
+    /** The tall calculator key. */
+    val calcKey: Color,
     val field: Color,
-    val headerTop: Color,
-    val headerBottom: Color,
-    val gold: Color,
-    val danger: Color,
 )
 
+private val Navy = Color(0xFF0B1D38)
+
 private val Light = Palette(
-    background = Color(0xFFEEF3FB),
+    backdropTop = Color(0xFFFF8B3D),
+    backdropBottom = Color(0xFFF2600E),
+    onBackdrop = Color(0xFFFFFFFF),
+    sheet = Color(0xFFF2F4F8),
     card = Color(0xFFFFFFFF),
-    label = Color(0xFF0A1530),
+    label = Navy,
     secondary = Color(0xFF6E7B96),
-    separator = Color(0xFFE3E9F4),
-    accent = Color(0xFF0B63F3),
+    separator = Color(0xFFECEEF3),
+    // Darker than the brand orange so text on white stays readable.
+    accent = Color(0xFFE5580B),
     onAccent = Color(0xFFFFFFFF),
     digitKey = Color(0xFFFFFFFF),
-    functionKey = Color(0xFFDCE5F5),
-    onFunctionKey = Color(0xFF0A1530),
-    field = Color(0xFFE3EAF6),
-    headerTop = Color(0xFF0B63F3),
-    headerBottom = Color(0xFF0039A6),
-    gold = Color(0xFFFF9F0A),
-    danger = Color(0xFFE5342B),
+    functionKey = Color(0x3DFFFFFF),
+    onFunctionKey = Color(0xFFFFFFFF),
+    calcKey = Navy,
+    field = Color(0xFFE7EAF1),
 )
 
 private val Dark = Palette(
-    background = Color(0xFF0A1530),
-    card = Color(0xFF14244A),
+    backdropTop = Color(0xFF10264A),
+    backdropBottom = Color(0xFF07122A),
+    onBackdrop = Color(0xFFFFFFFF),
+    sheet = Color(0xFF0B1D38),
+    card = Color(0xFF16294D),
     label = Color(0xFFFFFFFF),
     secondary = Color(0xFF8A9BC2),
-    separator = Color(0xFF22355F),
-    accent = Color(0xFF3B8BFF),
+    separator = Color(0xFF233A66),
+    accent = Color(0xFFFF7625),
     onAccent = Color(0xFFFFFFFF),
-    digitKey = Color(0xFF1C2F5C),
-    functionKey = Color(0xFF2A3F6E),
+    digitKey = Color(0xFF1C3460),
+    functionKey = Color(0xFF2A4677),
     onFunctionKey = Color(0xFFFFFFFF),
-    field = Color(0xFF1C2F5C),
-    headerTop = Color(0xFF0B4FD0),
-    headerBottom = Color(0xFF072A7A),
-    gold = Color(0xFFFF9F0A),
-    danger = Color(0xFFFF5A50),
+    calcKey = Color(0xFFFF7625),
+    field = Color(0xFF1C3460),
 )
 
 val LocalPalette = staticCompositionLocalOf { Light }
@@ -75,9 +81,9 @@ fun RateGuruTheme(content: @Composable () -> Unit) {
     val dark = isSystemInDarkTheme()
     val p = if (dark) Dark else Light
     val scheme = if (dark) {
-        darkColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.background, surface = p.card, surfaceContainerLow = p.card)
+        darkColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
     } else {
-        lightColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.background, surface = p.card, surfaceContainerLow = p.card)
+        lightColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
     }
     CompositionLocalProvider(LocalPalette provides p) {
         MaterialTheme(colorScheme = scheme, content = content)
