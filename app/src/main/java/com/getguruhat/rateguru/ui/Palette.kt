@@ -1,15 +1,15 @@
 package com.getguruhat.rateguru.ui
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * One dark look, like a classic converter: charcoal backdrop, the icon's blue header,
- * raised keys in red (C), steel blue (refresh), GuruHat orange (calculator) and graphite.
+ * Like a classic converter: charcoal backdrop, the icon's blue header, white cards and
+ * sheets, raised keys in red (C), steel blue (refresh), GuruHat orange (calculator) and graphite.
  */
 data class Palette(
     val backdropTop: Color,
@@ -40,18 +40,18 @@ private val Charcoal = Palette(
     headerTop = Color(0xFF0B63F3),
     headerBottom = Color(0xFF0039A6),
     onBackdrop = Color(0xFFFFFFFF),
-    sheet = Color(0xFF1C1D20),
-    card = Color(0xFF2C2E33),
-    label = Color(0xFFFFFFFF),
-    secondary = Color(0xFF9BA1AC),
-    separator = Color(0xFF3B3E45),
-    accent = Color(0xFF4C9BFF),
+    sheet = Color(0xFFF2F4F8),
+    card = Color(0xFFFFFFFF),
+    label = Color(0xFF0B1D38),
+    secondary = Color(0xFF6E7B96),
+    separator = Color(0xFFE6E9EF),
+    accent = Color(0xFF0B63F3),
     onAccent = Color(0xFFFFFFFF),
     digitKey = Color(0xFF4B4E55),
     clearKey = Color(0xFFD9473C),
     refreshKey = Color(0xFF4A7DB8),
     calcKey = Color(0xFFF2802E),
-    field = Color(0xFF34373D),
+    field = Color(0xFFE7EAF1),
 )
 
 val LocalPalette = staticCompositionLocalOf { Charcoal }
@@ -59,7 +59,7 @@ val LocalPalette = staticCompositionLocalOf { Charcoal }
 @Composable
 fun RateGuruTheme(content: @Composable () -> Unit) {
     val p = Charcoal
-    val scheme = darkColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
+    val scheme = lightColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
     CompositionLocalProvider(LocalPalette provides p) {
         MaterialTheme(colorScheme = scheme, content = content)
     }
