@@ -23,7 +23,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Add
-import androidx.compose.material.icons.rounded.Lightbulb
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +42,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
@@ -85,16 +85,21 @@ fun ConverterScreen(
             }
             Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
                 Spacer(Modifier.height(12.dp))
-                Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                BoxWithConstraints(Modifier.weight(1f)) {
+                // Rows stretch so the card fills the space above the keypad; past 84dp each
+                // they stop growing, and with many currencies they shrink to 56dp and scroll.
+                val addRow = if (state.codes.size < MAX_CURRENCIES) 52.dp else 0.dp
+                val rowHeight = ((maxHeight - addRow) / state.codes.size.coerceAtLeast(1)).coerceIn(56.dp, 84.dp)
+                Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
                         state.codes.forEachIndexed { i, code ->
                             if (i > 0) HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
-                            CurrencyRow(state, code, onActivate = { onActivate(code) }, onPick = { onPick(i) })
+                            CurrencyRow(state, code, rowHeight, onActivate = { onActivate(code) }, onPick = { onPick(i) })
                         }
                         if (state.codes.size < MAX_CURRENCIES) {
                             HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
                             Row(
-                                Modifier.fillMaxWidth().clickable(onClick = onAdd).padding(horizontal = 16.dp, vertical = 12.dp),
+                                Modifier.fillMaxWidth().height(addRow).clickable(onClick = onAdd).padding(horizontal = 16.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
@@ -105,6 +110,7 @@ fun ConverterScreen(
                             }
                         }
                     }
+                }
                 }
 
                 Spacer(Modifier.height(10.dp))
@@ -138,11 +144,10 @@ private fun Header(state: ConverterState, onSettings: () -> Unit) {
         now - checked < 60_000 -> "Rates checked just now"
         else -> "Rates checked " + DateUtils.getRelativeTimeSpanString(checked, now, DateUtils.MINUTE_IN_MILLIS)
     }
-    Row(Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 8.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("RateGuru", color = p.onBackdrop, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("RateGuru", color = p.onBackdrop, fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Text(status, color = p.onBackdrop.copy(alpha = 0.8f), fontSize = 13.sp)
-            QuickMath(state)
         }
         IconButton(onClick = onSettings) {
             Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = p.onBackdrop)
@@ -151,7 +156,7 @@ private fun Header(state: ConverterState, onSettings: () -> Unit) {
 }
 
 @Composable
-private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> Unit, onPick: () -> Unit) {
+private fun CurrencyRow(state: ConverterState, code: String, height: Dp, onActivate: () -> Unit, onPick: () -> Unit) {
     val p = LocalPalette.current
     val info = Currencies.info(code)
     val active = state.active == code
@@ -165,7 +170,7 @@ private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> U
             // A bar on the left edge marks the row you're typing in.
             .drawBehind { if (active) drawRect(p.accent, size = Size(4.dp.toPx(), size.height)) }
             .clickable(onClick = onActivate)
-            .heightIn(min = 56.dp)
+            .height(height)
             .padding(start = 12.dp, end = 16.dp, top = 3.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -208,25 +213,3 @@ private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> U
         }
     }
 }
-
-/** A rule for converting the active currency to your home currency without the phone. */
-@Composable
-private fun QuickMath(state: ConverterState) {
-    val p = LocalPalette.current
-    if (state.active == state.home) return
-    val rate = state.rates.convert(1.0, state.active, state.home) ?: return
-    val tip = Calc.mentalMath(rate) ?: return
-    Row(Modifier.padding(top = 2.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = p.onBackdrop, modifier = Modifier.size(14.dp))
-        Spacer(Modifier.width(4.dp))
-        Text(
-            "${state.active} → ${state.home}: ${tip.replaceFirstChar { it.lowercase() }}",
-            color = p.onBackdrop,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
-
