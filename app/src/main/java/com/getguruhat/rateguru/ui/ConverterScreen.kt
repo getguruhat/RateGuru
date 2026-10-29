@@ -35,7 +35,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,53 +64,62 @@ fun ConverterScreen(
 ) {
     val p = LocalPalette.current
     var mathMode by rememberSaveable { mutableStateOf(false) }
-    BoxWithConstraints(
-        Modifier
-            .fillMaxSize()
-            .background(p.background)
-            .systemBarsPadding()
-            .padding(horizontal = 16.dp),
-    ) {
-        // The keypad takes a fixed share of the screen; the list scrolls in what's left.
-        val keypadHeight = min(maxHeight * 0.40f, 340.dp)
-        Column(Modifier.fillMaxSize()) {
-            Header(state, onSettings)
+    Box(Modifier.fillMaxSize().background(p.background)) {
+        // The icon's blue behind the title, running under the status bar; the card overlaps its bottom.
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(p.headerTop, p.headerBottom)))
+                .statusBarsPadding()
+                .height(118.dp),
+        )
+        BoxWithConstraints(
+            Modifier
+                .fillMaxSize()
+                .systemBarsPadding()
+                .padding(horizontal = 16.dp),
+        ) {
+            // The keypad takes a fixed share of the screen; the list scrolls in what's left.
+            val keypadHeight = min(maxHeight * 0.40f, 340.dp)
+            Column(Modifier.fillMaxSize()) {
+                Header(state, onSettings)
 
-            Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
-                    state.codes.forEachIndexed { i, code ->
-                        if (i > 0) HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
-                        CurrencyRow(state, code, onActivate = { onActivate(code) }, onPick = { onPick(i) })
-                    }
-                    if (state.codes.size < MAX_CURRENCIES) {
-                        HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
-                        Row(
-                            Modifier.fillMaxWidth().clickable(onClick = onAdd).padding(horizontal = 16.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
-                                Icon(Icons.Rounded.Add, contentDescription = null, tint = p.accent)
+                Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                    Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
+                        state.codes.forEachIndexed { i, code ->
+                            if (i > 0) HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
+                            CurrencyRow(state, code, onActivate = { onActivate(code) }, onPick = { onPick(i) })
+                        }
+                        if (state.codes.size < MAX_CURRENCIES) {
+                            HorizontalDivider(color = p.separator, thickness = 0.5.dp, modifier = Modifier.padding(start = 64.dp))
+                            Row(
+                                Modifier.fillMaxWidth().clickable(onClick = onAdd).padding(horizontal = 16.dp, vertical = 12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Box(Modifier.size(34.dp), contentAlignment = Alignment.Center) {
+                                    Icon(Icons.Rounded.Add, contentDescription = null, tint = p.accent)
+                                }
+                                Spacer(Modifier.width(14.dp))
+                                Text("Add currency", color = p.accent, fontSize = 17.sp)
                             }
-                            Spacer(Modifier.width(14.dp))
-                            Text("Add currency", color = p.accent, fontSize = 17.sp)
                         }
                     }
+                    QuickMath(state)
                 }
-                QuickMath(state)
-            }
 
-            Spacer(Modifier.height(10.dp))
-            AnimatedVisibility(mathMode) {
-                MathRow(onKey, Modifier.padding(bottom = 10.dp))
+                Spacer(Modifier.height(10.dp))
+                AnimatedVisibility(mathMode) {
+                    MathRow(onKey, Modifier.padding(bottom = 10.dp))
+                }
+                Keypad(
+                    onKey = onKey,
+                    mathMode = mathMode,
+                    onToggleMath = { mathMode = !mathMode },
+                    refreshing = state.refreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier.fillMaxWidth().height(keypadHeight).padding(bottom = 10.dp),
+                )
             }
-            Keypad(
-                onKey = onKey,
-                mathMode = mathMode,
-                onToggleMath = { mathMode = !mathMode },
-                refreshing = state.refreshing,
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxWidth().height(keypadHeight).padding(bottom = 10.dp),
-            )
         }
     }
 }
@@ -126,11 +140,11 @@ private fun Header(state: ConverterState, onSettings: () -> Unit) {
     }
     Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text("RateGuru", color = p.label, fontSize = 28.sp, fontWeight = FontWeight.Bold)
-            Text(status, color = p.secondary, fontSize = 13.sp)
+            Text("RateGuru", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text(status, color = Color.White.copy(alpha = 0.78f), fontSize = 13.sp)
         }
         IconButton(onClick = onSettings) {
-            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = p.secondary)
+            Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = Color.White)
         }
     }
 }
@@ -147,6 +161,8 @@ private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> U
         Modifier
             .fillMaxWidth()
             .background(if (active) p.accent.copy(alpha = 0.10f) else p.card)
+            // A bar on the left edge marks the row you're typing in.
+            .drawBehind { if (active) drawRect(p.accent, size = Size(4.dp.toPx(), size.height)) }
             .clickable(onClick = onActivate)
             .heightIn(min = 58.dp)
             .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),

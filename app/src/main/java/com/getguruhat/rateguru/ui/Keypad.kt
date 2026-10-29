@@ -65,7 +65,7 @@ fun Keypad(
         Row(horizontalArrangement = Arrangement.spacedBy(Gap)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Gap)) {
                 Key(Modifier.height(row), p.functionKey, onClick = { onKey("AC") }) {
-                    Text("C", color = p.onFunctionKey, fontSize = 28.sp, fontWeight = FontWeight.Medium)
+                    Text("C", color = p.danger, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Key(Modifier.height(row), p.functionKey, onClick = onRefresh) {
                     val spin by rememberInfiniteTransition(label = "refresh").animateFloat(
@@ -79,11 +79,11 @@ fun Keypad(
                     )
                 }
                 // Spans the last two rows.
-                Key(Modifier.height(row * 2 + Gap), if (mathMode) p.accent else p.accent.copy(alpha = 0.85f), onClick = onToggleMath) {
+                Key(Modifier.height(row * 2 + Gap), if (mathMode) p.gold else p.gold.copy(alpha = 0.92f), onClick = onToggleMath) {
                     Icon(
                         if (mathMode) Icons.Rounded.Calculate else Icons.Outlined.Calculate,
                         contentDescription = if (mathMode) "Hide calculator" else "Calculator",
-                        tint = p.onAccent,
+                        tint = Color.White,
                         modifier = Modifier.size(34.dp),
                     )
                 }
