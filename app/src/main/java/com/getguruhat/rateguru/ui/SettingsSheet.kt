@@ -109,7 +109,7 @@ fun SettingsSheet(
             Card {
                 Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
                     Image(
-                        painterResource(R.drawable.ic_launcher_art),
+                        painterResource(R.drawable.about_icon),
                         contentDescription = null,
                         modifier = Modifier.size(52.dp).clip(RoundedCornerShape(12.dp)),
                     )
