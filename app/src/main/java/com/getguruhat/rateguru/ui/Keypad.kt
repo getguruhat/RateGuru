@@ -65,7 +65,7 @@ fun Keypad(
         Row(horizontalArrangement = Arrangement.spacedBy(Gap)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Gap)) {
                 Key(Modifier.height(row), p.functionKey, onClick = { onKey("AC") }) {
-                    Text("C", color = p.danger, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                    Text("C", color = p.onFunctionKey, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
                 }
                 Key(Modifier.height(row), p.functionKey, onClick = onRefresh) {
                     val spin by rememberInfiniteTransition(label = "refresh").animateFloat(
@@ -79,7 +79,7 @@ fun Keypad(
                     )
                 }
                 // Spans the last two rows.
-                Key(Modifier.height(row * 2 + Gap), if (mathMode) p.gold else p.gold.copy(alpha = 0.92f), onClick = onToggleMath) {
+                Key(Modifier.height(row * 2 + Gap), p.calcKey, onClick = onToggleMath) {
                     Icon(
                         if (mathMode) Icons.Rounded.Calculate else Icons.Outlined.Calculate,
                         contentDescription = if (mathMode) "Hide calculator" else "Calculator",
@@ -124,8 +124,8 @@ fun MathRow(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
     Row(modifier.fillMaxWidth().height(46.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("÷", "×", "−", "+", "%", "=").forEach { key ->
             val equals = key == "="
-            Key(Modifier.weight(1f), if (equals) p.accent else p.functionKey, onClick = { onKey(key) }) {
-                Text(key, color = if (equals) p.onAccent else p.accent, fontSize = 24.sp, fontWeight = FontWeight.Medium)
+            Key(Modifier.weight(1f), if (equals) p.calcKey else p.digitKey, onClick = { onKey(key) }) {
+                Text(key, color = if (equals) Color.White else p.accent, fontSize = 24.sp, fontWeight = FontWeight.Medium)
             }
         }
     }

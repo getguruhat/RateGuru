@@ -68,7 +68,7 @@ fun CurrencyPicker(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-        containerColor = p.background,
+        containerColor = p.sheet,
     ) {
         Column(Modifier.fillMaxHeight(0.92f).imePadding()) {
             Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
