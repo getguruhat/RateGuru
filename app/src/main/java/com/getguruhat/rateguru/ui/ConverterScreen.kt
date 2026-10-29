@@ -80,7 +80,7 @@ fun ConverterScreen(
                 .padding(horizontal = 16.dp),
         ) {
             // The keypad takes a fixed share of the screen; the list scrolls in what's left.
-            val keypadHeight = min(maxHeight * 0.45f, 390.dp)
+            val keypadHeight = min(maxHeight * 0.42f, 370.dp)
             Column(Modifier.fillMaxSize()) {
                 Header(state, onSettings)
 
