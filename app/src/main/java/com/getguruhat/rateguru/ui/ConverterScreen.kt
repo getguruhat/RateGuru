@@ -71,7 +71,7 @@ fun ConverterScreen(
                 .padding(horizontal = 16.dp),
         ) {
             // The keypad takes a fixed share of the screen; the list scrolls in what's left.
-            val keypadHeight = min(maxHeight * 0.40f, 340.dp)
+            val keypadHeight = min(maxHeight * 0.38f, 330.dp)
             Column(Modifier.fillMaxSize()) {
                 Header(state, onSettings)
 
@@ -128,7 +128,7 @@ private fun Header(state: ConverterState, onSettings: () -> Unit) {
         now - checked < 60_000 -> "Rates checked just now"
         else -> "Rates checked " + DateUtils.getRelativeTimeSpanString(checked, now, DateUtils.MINUTE_IN_MILLIS)
     }
-    Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.fillMaxWidth().padding(top = 2.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
             Text("RateGuru", color = p.onBackdrop, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text(status, color = p.onBackdrop.copy(alpha = 0.8f), fontSize = 13.sp)
@@ -155,16 +155,16 @@ private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> U
             // A bar on the left edge marks the row you're typing in.
             .drawBehind { if (active) drawRect(p.accent, size = Size(4.dp.toPx(), size.height)) }
             .clickable(onClick = onActivate)
-            .heightIn(min = 58.dp)
-            .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
+            .heightIn(min = 56.dp)
+            .padding(start = 12.dp, end = 16.dp, top = 3.dp, bottom = 3.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Flag and code change this row's currency; the rest of the row types into it.
         Row(
-            Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onPick).padding(4.dp),
+            Modifier.clip(RoundedCornerShape(10.dp)).clickable(onClick = onPick).padding(horizontal = 4.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(info.flag, fontSize = 30.sp)
+            Text(info.flag, fontSize = 26.sp)
             Spacer(Modifier.width(10.dp))
             Column {
                 Text(code, color = p.label, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
@@ -210,7 +210,7 @@ private fun QuickMath(state: ConverterState) {
         Icon(Icons.Rounded.Lightbulb, contentDescription = null, tint = p.onBackdrop, modifier = Modifier.size(14.dp))
         Spacer(Modifier.width(4.dp))
         Text(
-            "${state.active} → ${state.home} in your head: $tip",
+            "${state.active} → ${state.home}: ${tip.replaceFirstChar { it.lowercase() }}",
             color = p.onBackdrop,
             fontSize = 13.sp,
             fontWeight = FontWeight.Medium,
