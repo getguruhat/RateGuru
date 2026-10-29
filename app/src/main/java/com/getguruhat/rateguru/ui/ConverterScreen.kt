@@ -62,7 +62,7 @@ fun ConverterScreen(
             .padding(horizontal = 16.dp),
     ) {
         // The keypad takes a fixed share of the screen; the list scrolls in what's left.
-        val keypadHeight = min(maxHeight * 0.44f, 380.dp)
+        val keypadHeight = min(maxHeight * 0.40f, 340.dp)
         Column(Modifier.fillMaxSize()) {
             Header(state, onRefresh, onSettings)
 
@@ -98,11 +98,16 @@ fun ConverterScreen(
 @Composable
 private fun Header(state: ConverterState, onRefresh: () -> Unit, onSettings: () -> Unit) {
     val p = LocalPalette.current
-    val ago = DateUtils.getRelativeTimeSpanString(state.rates.updated * 1000, System.currentTimeMillis(), DateUtils.MINUTE_IN_MILLIS)
+    val now = System.currentTimeMillis()
+    // The source publishes once a day, so "checked" (when this phone last asked) is the
+    // number that tells you the app is current; the built-in snapshot only has its publish date.
+    val checked = state.rates.fetchedAt.takeIf { it > 0 }
     val status = when {
         state.refreshing -> "Updating rates…"
-        state.offline -> "Offline · rates from $ago"
-        else -> "Rates updated $ago"
+        state.offline || checked == null ->
+            "Offline · rates from " + DateUtils.getRelativeTimeSpanString(state.rates.updated * 1000, now, DateUtils.MINUTE_IN_MILLIS)
+        now - checked < 60_000 -> "Rates checked just now"
+        else -> "Rates checked " + DateUtils.getRelativeTimeSpanString(checked, now, DateUtils.MINUTE_IN_MILLIS)
     }
     Row(Modifier.fillMaxWidth().padding(top = 4.dp, bottom = 10.dp), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -131,7 +136,7 @@ private fun CurrencyRow(state: ConverterState, code: String, onActivate: () -> U
             .fillMaxWidth()
             .background(if (active) p.accent.copy(alpha = 0.10f) else p.card)
             .clickable(onClick = onActivate)
-            .heightIn(min = 62.dp)
+            .heightIn(min = 58.dp)
             .padding(start = 12.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

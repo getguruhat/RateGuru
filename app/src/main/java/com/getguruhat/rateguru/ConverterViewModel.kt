@@ -147,6 +147,7 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
         if (s.active == code) return
         val carried = s.valueOf(code)?.takeIf { s.expr.isNotEmpty() && it > 0 }
             ?.let { Calc.plain(it, Currencies.info(code).decimals) }
+            ?.let { if ('.' in it) it.trimEnd('0').trimEnd('.') else it }
             .orEmpty()
         justEvaluated = true
         prefs.active = code
