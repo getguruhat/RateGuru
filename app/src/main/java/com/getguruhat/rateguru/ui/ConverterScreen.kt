@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -63,27 +63,28 @@ fun ConverterScreen(
 ) {
     val p = LocalPalette.current
     var mathMode by rememberSaveable { mutableStateOf(false) }
-    // Charcoal backdrop under everything; the icon's blue behind the header, running under the
-    // status bar, with the currency card overlapping its bottom edge.
-    Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(p.backdropTop, p.backdropBottom)))) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(Brush.verticalGradient(listOf(p.headerTop, p.headerBottom)))
-                .statusBarsPadding()
-                .height(112.dp),
-        )
-        BoxWithConstraints(
-            Modifier
-                .fillMaxSize()
-                .systemBarsPadding()
-                .padding(horizontal = 16.dp),
-        ) {
-            // The keypad takes a fixed share of the screen; the list scrolls in what's left.
-            val keypadHeight = min(maxHeight * 0.42f, 370.dp)
-            Column(Modifier.fillMaxSize()) {
+    // Charcoal backdrop under everything; the blue header runs under the status bar and
+    // ends where the currency card begins.
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .background(Brush.verticalGradient(listOf(p.backdropTop, p.backdropBottom)))
+            .navigationBarsPadding(),
+    ) {
+        // The keypad takes a fixed share of the screen; the list scrolls in what's left.
+        val keypadHeight = min(maxHeight * 0.37f, 333.dp)
+        Column(Modifier.fillMaxSize()) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(Brush.verticalGradient(listOf(p.headerTop, p.headerBottom)))
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp),
+            ) {
                 Header(state, onSettings)
-
+            }
+            Column(Modifier.weight(1f).padding(horizontal = 16.dp)) {
+                Spacer(Modifier.height(12.dp))
                 Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                     Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
                         state.codes.forEachIndexed { i, code ->
