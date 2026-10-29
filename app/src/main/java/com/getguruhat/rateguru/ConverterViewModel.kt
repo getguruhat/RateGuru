@@ -115,7 +115,8 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
                 if ('.' !in cur) e += if (cur.isEmpty()) "0." else "."
             }
             "000", "0" -> {
-                if (justEvaluated) e = ""
+                // After "=", 0 starts a new number but 000 grows the result (600 -> 600,000).
+                if (justEvaluated && key == "0") e = ""
                 // No leading zeros: "0" + "0" stays "0", and "000" needs a number before it.
                 val cur = e.takeLastWhile { it.isDigit() || it == '.' }
                 if (cur.isNotEmpty() && cur != "0") e += key
