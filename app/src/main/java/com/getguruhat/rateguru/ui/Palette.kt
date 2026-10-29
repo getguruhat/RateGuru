@@ -1,23 +1,22 @@
 package com.getguruhat.rateguru.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * GuruHat colours. Light mode puts the whole screen on the icon's orange gradient so the
- * white cards and keys stand out; dark mode is GuruHat navy with orange accents.
+ * One dark look, like a classic converter: charcoal backdrop, the icon's blue header,
+ * raised keys in red (C), steel blue (refresh), GuruHat orange (calculator) and graphite.
  */
 data class Palette(
-    /** Main screen backdrop, top to bottom. */
     val backdropTop: Color,
     val backdropBottom: Color,
-    /** Text and icons drawn straight on the backdrop (title, status, tip). */
+    val headerTop: Color,
+    val headerBottom: Color,
+    /** Text and icons drawn on the header and backdrop. */
     val onBackdrop: Color,
     /** Bottom sheets (currency list, settings). */
     val sheet: Color,
@@ -28,63 +27,39 @@ data class Palette(
     val accent: Color,
     val onAccent: Color,
     val digitKey: Color,
-    val functionKey: Color,
-    val onFunctionKey: Color,
-    /** The tall calculator key. */
+    val clearKey: Color,
+    val refreshKey: Color,
+    /** The tall calculator key, and "=". */
     val calcKey: Color,
     val field: Color,
 )
 
-private val Navy = Color(0xFF0B1D38)
-
-private val Light = Palette(
-    backdropTop = Color(0xFFFF8B3D),
-    backdropBottom = Color(0xFFF2600E),
+private val Charcoal = Palette(
+    backdropTop = Color(0xFF232428),
+    backdropBottom = Color(0xFF161719),
+    headerTop = Color(0xFF0B63F3),
+    headerBottom = Color(0xFF0039A6),
     onBackdrop = Color(0xFFFFFFFF),
-    sheet = Color(0xFFF2F4F8),
-    card = Color(0xFFFFFFFF),
-    label = Navy,
-    secondary = Color(0xFF6E7B96),
-    separator = Color(0xFFECEEF3),
-    // Darker than the brand orange so text on white stays readable.
-    accent = Color(0xFFE5580B),
-    onAccent = Color(0xFFFFFFFF),
-    digitKey = Color(0xFFFFFFFF),
-    functionKey = Color(0x3DFFFFFF),
-    onFunctionKey = Color(0xFFFFFFFF),
-    calcKey = Navy,
-    field = Color(0xFFE7EAF1),
-)
-
-private val Dark = Palette(
-    backdropTop = Color(0xFF10264A),
-    backdropBottom = Color(0xFF07122A),
-    onBackdrop = Color(0xFFFFFFFF),
-    sheet = Color(0xFF0B1D38),
-    card = Color(0xFF16294D),
+    sheet = Color(0xFF1C1D20),
+    card = Color(0xFF2C2E33),
     label = Color(0xFFFFFFFF),
-    secondary = Color(0xFF8A9BC2),
-    separator = Color(0xFF233A66),
-    accent = Color(0xFFFF7625),
+    secondary = Color(0xFF9BA1AC),
+    separator = Color(0xFF3B3E45),
+    accent = Color(0xFF4C9BFF),
     onAccent = Color(0xFFFFFFFF),
-    digitKey = Color(0xFF1C3460),
-    functionKey = Color(0xFF2A4677),
-    onFunctionKey = Color(0xFFFFFFFF),
-    calcKey = Color(0xFFFF7625),
-    field = Color(0xFF1C3460),
+    digitKey = Color(0xFF4B4E55),
+    clearKey = Color(0xFFD9473C),
+    refreshKey = Color(0xFF4A7DB8),
+    calcKey = Color(0xFFF2802E),
+    field = Color(0xFF34373D),
 )
 
-val LocalPalette = staticCompositionLocalOf { Light }
+val LocalPalette = staticCompositionLocalOf { Charcoal }
 
 @Composable
 fun RateGuruTheme(content: @Composable () -> Unit) {
-    val dark = isSystemInDarkTheme()
-    val p = if (dark) Dark else Light
-    val scheme = if (dark) {
-        darkColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
-    } else {
-        lightColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
-    }
+    val p = Charcoal
+    val scheme = darkColorScheme(primary = p.accent, onPrimary = p.onAccent, background = p.sheet, surface = p.card, surfaceContainerLow = p.card)
     CompositionLocalProvider(LocalPalette provides p) {
         MaterialTheme(colorScheme = scheme, content = content)
     }
