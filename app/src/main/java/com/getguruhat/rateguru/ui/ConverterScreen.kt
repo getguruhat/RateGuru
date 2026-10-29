@@ -23,12 +23,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Lightbulb
-import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +58,7 @@ fun ConverterScreen(
     onSettings: () -> Unit,
 ) {
     val p = LocalPalette.current
+    var mathMode by rememberSaveable { mutableStateOf(false) }
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
@@ -64,7 +69,7 @@ fun ConverterScreen(
         // The keypad takes a fixed share of the screen; the list scrolls in what's left.
         val keypadHeight = min(maxHeight * 0.40f, 340.dp)
         Column(Modifier.fillMaxSize()) {
-            Header(state, onRefresh, onSettings)
+            Header(state, onSettings)
 
             Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
                 Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
@@ -90,13 +95,23 @@ fun ConverterScreen(
             }
 
             Spacer(Modifier.height(10.dp))
-            Keypad(onKey, Modifier.fillMaxWidth().height(keypadHeight).padding(bottom = 10.dp))
+            AnimatedVisibility(mathMode) {
+                MathRow(onKey, Modifier.padding(bottom = 10.dp))
+            }
+            Keypad(
+                onKey = onKey,
+                mathMode = mathMode,
+                onToggleMath = { mathMode = !mathMode },
+                refreshing = state.refreshing,
+                onRefresh = onRefresh,
+                modifier = Modifier.fillMaxWidth().height(keypadHeight).padding(bottom = 10.dp),
+            )
         }
     }
 }
 
 @Composable
-private fun Header(state: ConverterState, onRefresh: () -> Unit, onSettings: () -> Unit) {
+private fun Header(state: ConverterState, onSettings: () -> Unit) {
     val p = LocalPalette.current
     val now = System.currentTimeMillis()
     // The source publishes once a day, so "checked" (when this phone last asked) is the
@@ -113,9 +128,6 @@ private fun Header(state: ConverterState, onRefresh: () -> Unit, onSettings: () 
         Column(Modifier.weight(1f)) {
             Text("RateGuru", color = p.label, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text(status, color = p.secondary, fontSize = 13.sp)
-        }
-        IconButton(onClick = onRefresh, enabled = !state.refreshing) {
-            Icon(Icons.Rounded.Refresh, contentDescription = "Refresh rates", tint = p.secondary)
         }
         IconButton(onClick = onSettings) {
             Icon(Icons.Outlined.Settings, contentDescription = "Settings", tint = p.secondary)
