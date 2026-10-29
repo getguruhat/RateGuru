@@ -9,7 +9,6 @@ A currency converter for travelers, with no ads. It works offline, needs no acco
 - **Many currencies at once.** Up to 8 on one screen, all converting together. Tap any row to type in it, and tap a flag to change or remove that currency.
 - **Opens on the currency you need.** When you land somewhere new, RateGuru picks the local currency from the mobile network and puts it at the top.
 - **Simple keypad.** Four rows, like a classic converter. Tap the calculator key for + − × ÷ % (sums like `45000 × 3`, a tip with `+ 10%`). Hold 0 for 000, and hold ⌫ to clear.
-- **Rule of thumb.** For example, "Drop 3 zeros, then ÷ 26" for Vietnamese dong to US dollars.
 - **Works offline.** It keeps the last rates it downloaded, and ships with a snapshot of 166 currencies.
 - **Dark charcoal look with raised 3D keys**, and it updates itself from GitHub releases.
 
