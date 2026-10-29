@@ -14,12 +14,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class ConverterState(
-    /** Usually where you are (top) and your home currency (bottom). */
-    val top: String,
-    val bottom: String,
+    /** The currencies on screen, top to bottom; all of them convert at once. */
+    val codes: List<String>,
+    /** The row the keypad types into. */
+    val active: String,
     val home: String,
-    /** True while typing into the top row; tap the other row to type there. */
-    val topActive: Boolean = true,
     val expr: String = "",
     val rates: Rates,
     val refreshing: Boolean = false,
@@ -28,13 +27,11 @@ data class ConverterState(
     val autoDetect: Boolean = true,
     val recents: List<String> = emptyList(),
 ) {
-    val input get() = if (topActive) top else bottom
-    val output get() = if (topActive) bottom else top
     val amount: Double get() = Calc.evaluate(expr) ?: 0.0
-    val converted: Double? get() = rates.convert(amount, input, output)
+    fun valueOf(code: String): Double? = if (code == active) amount else rates.convert(amount, active, code)
 }
 
-enum class Slot { Top, Bottom, Home }
+const val MAX_CURRENCIES = 8
 
 class ConverterViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -48,16 +45,26 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
     init {
         val home = prefs.home ?: Currencies.detectHome(app).also { prefs.home = it }
         val detected = Currencies.detectLocal(app)
-        // A newly detected country (you just landed) wins; otherwise keep the user's own pick.
-        val local = if (prefs.autoDetect && detected != null && detected != prefs.lastDetected) detected else prefs.local ?: detected
+        var codes = prefs.codes.ifEmpty {
+            // First launch: where you are, home, then the big travel currencies.
+            (listOfNotNull(detected, home) + listOf("USD", "EUR", "GBP", "JPY")).distinct().take(4)
+        }
+        var active = prefs.active?.takeIf { it in codes } ?: codes.first()
+        // Just landed somewhere new: put its currency on top and type in it.
+        if (prefs.autoDetect && detected != null && detected != prefs.lastDetected) {
+            codes = (listOf(detected) + codes.filter { it != detected }).take(MAX_CURRENCIES)
+            active = detected
+        }
         detected?.let { prefs.lastDetected = it }
-        val top = local?.takeIf { it != home } ?: if (home == "USD") "EUR" else "USD"
-        prefs.local = top
+        if (home !in codes) codes = (codes + home).takeLast(MAX_CURRENCIES)
+        prefs.codes = codes
+        prefs.active = active
         _state = MutableStateFlow(
             ConverterState(
-                top = top,
-                bottom = home,
+                codes = codes,
+                active = active,
                 home = home,
+                expr = prefs.expr,
                 rates = repo.loadCached(),
                 detected = detected,
                 autoDetect = prefs.autoDetect,
@@ -79,6 +86,11 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    private fun setExpr(e: String) {
+        prefs.expr = e
+        _state.update { it.copy(expr = e) }
+    }
+
     fun press(key: String) {
         val s = _state.value
         var e = s.expr
@@ -86,20 +98,21 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
         val currentNumber = e.takeLastWhile { it.isDigit() || it == '.' }
         when (key) {
             "AC" -> e = ""
-            "⌫" -> e = e.dropLast(1)
+            "⌫" -> e = if (justEvaluated) "" else e.dropLast(1)
             "=" -> {
                 val v = Calc.evaluate(e)
                 e = if (v == null || v < 0) "" else Calc.plain(v, 8).let { p ->
                     if ('.' in p) p.trimEnd('0').trimEnd('.') else p
                 }
                 justEvaluated = true
-                _state.update { it.copy(expr = e) }
+                setExpr(e)
                 return
             }
             "%" -> if (last != null && last.isDigit()) e += "%"
             "." -> {
                 if (justEvaluated) e = ""
-                if ('.' !in currentNumber) e += if (currentNumber.isEmpty()) "0." else "."
+                val cur = e.takeLastWhile { it.isDigit() || it == '.' }
+                if ('.' !in cur) e += if (cur.isEmpty()) "0." else "."
             }
             "000", "0" -> {
                 if (justEvaluated) e = ""
@@ -124,47 +137,63 @@ class ConverterViewModel(app: Application) : AndroidViewModel(app) {
         justEvaluated = false
         // Keep it on screen: 15 digits is already a quadrillion.
         if (e.count { it.isDigit() } > 15 && e.length > s.expr.length) return
-        _state.update { it.copy(expr = e) }
+        if (currentNumber.length > 15 && e.length > s.expr.length) return
+        setExpr(e)
     }
 
-    fun setAmount(v: Double) {
-        justEvaluated = true
-        _state.update { it.copy(expr = Calc.plain(v, 0)) }
-    }
-
-    /** Make the other row the one you type into, starting from the number it showed. */
-    fun activate(top: Boolean) {
+    /** Type into another row, starting from the number it showed. */
+    fun activate(code: String) {
         val s = _state.value
-        if (s.topActive == top) return
-        val carried = s.converted?.takeIf { s.expr.isNotEmpty() && it > 0 }
-            ?.let { Calc.plain(it, Currencies.info(s.output).decimals) }
+        if (s.active == code) return
+        val carried = s.valueOf(code)?.takeIf { s.expr.isNotEmpty() && it > 0 }
+            ?.let { Calc.plain(it, Currencies.info(code).decimals) }
             .orEmpty()
         justEvaluated = true
-        _state.update { it.copy(topActive = top, expr = carried) }
+        prefs.active = code
+        prefs.expr = carried
+        _state.update { it.copy(active = code, expr = carried) }
     }
 
-    fun swap() {
-        _state.update { it.copy(top = it.bottom, bottom = it.top) }
-        prefs.local = _state.value.top
-    }
-
-    fun pick(slot: Slot, code: String) {
+    /** Replace the currency at [index]; picking one already listed swaps the two rows. */
+    fun replace(index: Int, code: String) {
         val s = _state.value
-        when (slot) {
-            Slot.Home -> {
-                prefs.home = code
-                _state.update {
-                    val top = if (it.top == code) it.bottom else it.top
-                    it.copy(home = code, bottom = code, top = top)
-                }
-            }
-            Slot.Top -> _state.update { if (code == it.bottom) it.copy(top = code, bottom = it.top) else it.copy(top = code) }
-            Slot.Bottom -> _state.update { if (code == it.top) it.copy(bottom = code, top = it.bottom) else it.copy(bottom = code) }
-        }
-        prefs.local = _state.value.top
-        val recents = (listOf(code) + s.recents.filter { it != code }).take(6)
+        val old = s.codes.getOrNull(index) ?: return
+        val codes = s.codes.toMutableList()
+        val existing = codes.indexOf(code)
+        if (existing >= 0) codes[existing] = old
+        codes[index] = code
+        val active = if (s.active == old) code else s.active
+        save(codes, active, code)
+    }
+
+    fun add(code: String) {
+        val s = _state.value
+        if (code in s.codes || s.codes.size >= MAX_CURRENCIES) return
+        save(s.codes + code, s.active, code)
+    }
+
+    fun remove(index: Int) {
+        val s = _state.value
+        if (s.codes.size <= 2) return
+        val codes = s.codes.filterIndexed { i, _ -> i != index }
+        save(codes, s.active.takeIf { it in codes } ?: codes.first(), null)
+    }
+
+    fun setHome(code: String) {
+        prefs.home = code
+        val s = _state.value
+        val codes = if (code in s.codes) s.codes else (s.codes + code).takeLast(MAX_CURRENCIES)
+        _state.update { it.copy(home = code) }
+        save(codes, s.active.takeIf { it in codes } ?: codes.first(), code)
+    }
+
+    private fun save(codes: List<String>, active: String, picked: String?) {
+        prefs.codes = codes
+        prefs.active = active
+        val recents = if (picked == null) _state.value.recents
+        else (listOf(picked) + _state.value.recents.filter { it != picked }).take(6)
         prefs.recents = recents
-        _state.update { it.copy(recents = recents) }
+        _state.update { it.copy(codes = codes, active = active, recents = recents) }
     }
 
     fun setAutoDetect(on: Boolean) {

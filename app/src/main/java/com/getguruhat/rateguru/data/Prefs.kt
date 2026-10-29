@@ -10,10 +10,20 @@ class Prefs(context: Context) {
         get() = sp.getString("home", null)
         set(value) = sp.edit().putString("home", value).apply()
 
-    /** The travel currency the user last had on top. */
-    var local: String?
-        get() = sp.getString("local", null)
-        set(value) = sp.edit().putString("local", value).apply()
+    /** The currencies on the main screen, top to bottom. */
+    var codes: List<String>
+        get() = sp.getString("codes", "")!!.split(",").filter { it.length == 3 }
+        set(value) = sp.edit().putString("codes", value.joinToString(",")).apply()
+
+    /** The row being typed into. */
+    var active: String?
+        get() = sp.getString("active", null)
+        set(value) = sp.edit().putString("active", value).apply()
+
+    /** What was on the keypad, so the app reopens where you left it. */
+    var expr: String
+        get() = sp.getString("expr", "100")!!
+        set(value) = sp.edit().putString("expr", value).apply()
 
     /** Follow the mobile network's country when it changes (e.g. after landing). */
     var autoDetect: Boolean

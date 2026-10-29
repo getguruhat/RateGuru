@@ -18,6 +18,9 @@ import com.getguruhat.rateguru.ui.SettingsSheet
 import com.getguruhat.rateguru.update.UpdateDialog
 import com.getguruhat.rateguru.update.UpdateViewModel
 
+private const val PICK_ADD = -1
+private const val PICK_HOME = -2
+
 class MainActivity : ComponentActivity() {
 
     private val converter: ConverterViewModel by viewModels()
@@ -35,17 +38,15 @@ class MainActivity : ComponentActivity() {
                 val state by converter.state.collectAsStateWithLifecycle()
                 val update by updates.state.collectAsStateWithLifecycle()
                 // Saveable, so the sheets come back after a theme change recreates the screen.
-                var picking by rememberSaveable { mutableStateOf<Slot?>(null) }
+                var picking by rememberSaveable { mutableStateOf<Int?>(null) }
                 var settings by rememberSaveable { mutableStateOf(false) }
 
                 ConverterScreen(
                     state = state,
                     onKey = converter::press,
                     onActivate = converter::activate,
-                    onSwap = converter::swap,
-                    onPickTop = { picking = Slot.Top },
-                    onPickBottom = { picking = Slot.Bottom },
-                    onQuickAmount = converter::setAmount,
+                    onPick = { picking = it },
+                    onAdd = { picking = PICK_ADD },
                     onRefresh = converter::refresh,
                     onSettings = { settings = true },
                 )
@@ -56,7 +57,7 @@ class MainActivity : ComponentActivity() {
                         detected = state.detected,
                         autoDetect = state.autoDetect,
                         theme = AppTheme.read(this),
-                        onPickHome = { picking = Slot.Home },
+                        onPickHome = { picking = PICK_HOME },
                         onAutoDetect = converter::setAutoDetect,
                         onTheme = {
                             AppTheme.write(this, it)
@@ -66,25 +67,38 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
-                picking?.let { slot ->
-                    val selected = when (slot) {
-                        Slot.Top -> state.top
-                        Slot.Bottom -> state.bottom
-                        Slot.Home -> state.home
-                    }
+                // A row index to change that row, or PICK_ADD / PICK_HOME.
+                picking?.let { target ->
+                    val listed = state.rates.perUsd.keys
                     CurrencyPicker(
-                        title = when (slot) {
-                            Slot.Home -> "Home currency"
-                            else -> "Choose currency"
+                        title = when (target) {
+                            PICK_HOME -> "Home currency"
+                            PICK_ADD -> "Add currency"
+                            else -> "Change currency"
                         },
-                        selected = selected,
-                        all = state.rates.perUsd.keys,
-                        suggested = listOfNotNull(state.detected, state.home) + state.recents,
+                        selected = when (target) {
+                            PICK_HOME -> state.home
+                            PICK_ADD -> ""
+                            else -> state.codes.getOrElse(target) { "" }
+                        },
+                        all = if (target == PICK_ADD) listed - state.codes.toSet() else listed,
+                        suggested = (listOfNotNull(state.detected, state.home) + state.recents)
+                            .filter { target != PICK_ADD || it !in state.codes },
                         onPick = {
-                            converter.pick(slot, it)
+                            when (target) {
+                                PICK_HOME -> converter.setHome(it)
+                                PICK_ADD -> converter.add(it)
+                                else -> converter.replace(target, it)
+                            }
                             picking = null
                         },
                         onDismiss = { picking = null },
+                        onRemove = if (target >= 0 && state.codes.size > 2) {
+                            {
+                                converter.remove(target)
+                                picking = null
+                            }
+                        } else null,
                     )
                 }
 
