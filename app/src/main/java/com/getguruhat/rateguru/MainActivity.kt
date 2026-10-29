@@ -1,6 +1,5 @@
 package com.getguruhat.rateguru
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -27,13 +26,9 @@ class MainActivity : ComponentActivity() {
     private val converter: ConverterViewModel by viewModels()
     private val updates: UpdateViewModel by viewModels()
 
-    override fun attachBaseContext(newBase: Context) {
-        super.attachBaseContext(AppTheme.wrap(newBase))
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Light system-bar icons always: they sit on the orange (or navy) backdrop in both themes.
+        // Light system-bar icons always: the header is blue and the backdrop charcoal.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
             navigationBarStyle = SystemBarStyle.dark(android.graphics.Color.TRANSPARENT),
@@ -42,7 +37,7 @@ class MainActivity : ComponentActivity() {
             RateGuruTheme {
                 val state by converter.state.collectAsStateWithLifecycle()
                 val update by updates.state.collectAsStateWithLifecycle()
-                // Saveable, so the sheets come back after a theme change recreates the screen.
+                // Saveable, so an open sheet survives the screen being recreated.
                 var picking by rememberSaveable { mutableStateOf<Int?>(null) }
                 var settings by rememberSaveable { mutableStateOf(false) }
 
@@ -61,13 +56,8 @@ class MainActivity : ComponentActivity() {
                         home = state.home,
                         detected = state.detected,
                         autoDetect = state.autoDetect,
-                        theme = AppTheme.read(this),
                         onPickHome = { picking = PICK_HOME },
                         onAutoDetect = converter::setAutoDetect,
-                        onTheme = {
-                            AppTheme.write(this, it)
-                            recreate()
-                        },
                         onDismiss = { settings = false },
                     )
                 }

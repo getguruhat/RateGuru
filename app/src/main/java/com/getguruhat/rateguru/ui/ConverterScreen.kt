@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -62,8 +63,16 @@ fun ConverterScreen(
 ) {
     val p = LocalPalette.current
     var mathMode by rememberSaveable { mutableStateOf(false) }
-    // The whole screen sits on the backdrop gradient, under the status and navigation bars too.
+    // Charcoal backdrop under everything; the icon's blue behind the header, running under the
+    // status bar, with the currency card overlapping its bottom edge.
     Box(Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(p.backdropTop, p.backdropBottom)))) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(Brush.verticalGradient(listOf(p.headerTop, p.headerBottom)))
+                .statusBarsPadding()
+                .height(112.dp),
+        )
         BoxWithConstraints(
             Modifier
                 .fillMaxSize()

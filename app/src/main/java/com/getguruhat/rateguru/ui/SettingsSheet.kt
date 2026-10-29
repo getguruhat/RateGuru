@@ -45,10 +45,8 @@ fun SettingsSheet(
     home: String,
     detected: String?,
     autoDetect: Boolean,
-    theme: String,
     onPickHome: () -> Unit,
     onAutoDetect: (Boolean) -> Unit,
-    onTheme: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val p = LocalPalette.current
@@ -82,28 +80,6 @@ fun SettingsSheet(
                     "When you land somewhere new, RateGuru switches to the local currency on its own."
                 else "When you land somewhere new, RateGuru switches to the local currency on its own, using the mobile network (no location access).",
             )
-
-            Section("Appearance")
-            Card {
-                Row(Modifier.padding(6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf("system" to "Automatic", "light" to "Light", "dark" to "Dark").forEach { (key, label) ->
-                        val on = key == theme
-                        Text(
-                            label,
-                            color = if (on) p.onAccent else p.label,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Medium,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(if (on) p.accent else p.field)
-                                .clickable { onTheme(key) }
-                                .padding(vertical = 10.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                        )
-                    }
-                }
-            }
 
             Section("About")
             Card {

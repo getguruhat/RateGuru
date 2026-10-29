@@ -11,7 +11,7 @@ A currency converter for travelers, with no ads. It works offline, needs no acco
 - **Simple keypad.** Four rows, like a classic converter. Tap the calculator key for + − × ÷ % (sums like `45000 × 3`, a tip with `+ 10%`). Hold 0 for 000, and hold ⌫ to clear.
 - **Rule of thumb.** For example, "Drop 3 zeros, then ÷ 26" for Vietnamese dong to US dollars.
 - **Works offline.** It keeps the last rates it downloaded, and ships with a snapshot of 166 currencies.
-- **Light and dark mode**, and it updates itself from GitHub releases.
+- **Dark charcoal look with raised 3D keys**, and it updates itself from GitHub releases.
 
 ## Download
 

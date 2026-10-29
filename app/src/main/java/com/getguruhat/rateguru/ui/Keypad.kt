@@ -1,6 +1,7 @@
 package com.getguruhat.rateguru.ui
 
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -8,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -17,6 +19,8 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
@@ -35,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -64,17 +70,17 @@ fun Keypad(
         val row = (maxHeight - Gap * 3) / 4
         Row(horizontalArrangement = Arrangement.spacedBy(Gap)) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(Gap)) {
-                Key(Modifier.height(row), p.functionKey, onClick = { onKey("AC") }) {
-                    Text("C", color = p.onFunctionKey, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
+                Key(Modifier.height(row), p.clearKey, onClick = { onKey("AC") }) {
+                    Text("C", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.SemiBold)
                 }
-                Key(Modifier.height(row), p.functionKey, onClick = onRefresh) {
+                Key(Modifier.height(row), p.refreshKey, onClick = onRefresh) {
                     val spin by rememberInfiniteTransition(label = "refresh").animateFloat(
                         0f, 360f, infiniteRepeatable(tween(900, easing = LinearEasing), RepeatMode.Restart), label = "spin",
                     )
                     Icon(
                         Icons.Rounded.Refresh,
                         contentDescription = "Refresh rates",
-                        tint = p.onFunctionKey,
+                        tint = Color.White,
                         modifier = Modifier.size(30.dp).rotate(if (refreshing) spin else 0f),
                     )
                 }
@@ -104,9 +110,9 @@ fun Keypad(
                                 },
                             ) {
                                 if (key == "⌫") {
-                                    Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = "Delete", tint = p.label)
+                                    Icon(Icons.AutoMirrored.Outlined.Backspace, contentDescription = "Delete", tint = Color.White)
                                 } else {
-                                    Text(key, color = p.label, fontSize = 30.sp, fontWeight = FontWeight.Medium)
+                                    Text(key, color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Medium)
                                 }
                             }
                         }
@@ -121,16 +127,20 @@ fun Keypad(
 @Composable
 fun MathRow(onKey: (String) -> Unit, modifier: Modifier = Modifier) {
     val p = LocalPalette.current
-    Row(modifier.fillMaxWidth().height(46.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(modifier.fillMaxWidth().height(50.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         listOf("÷", "×", "−", "+", "%", "=").forEach { key ->
             val equals = key == "="
             Key(Modifier.weight(1f), if (equals) p.calcKey else p.digitKey, onClick = { onKey(key) }) {
-                Text(key, color = if (equals) Color.White else p.accent, fontSize = 24.sp, fontWeight = FontWeight.Medium)
+                Text(key, color = if (equals) Color.White else p.calcKey, fontSize = 24.sp, fontWeight = FontWeight.Medium)
             }
         }
     }
 }
 
+/**
+ * A raised key: a darker base underneath, a face with a top-lit gradient and a thin highlight
+ * on its upper edge. Pressing pushes the face down onto the base.
+ */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Key(
@@ -140,16 +150,18 @@ private fun Key(
     onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
-    val p = LocalPalette.current
     val haptics = LocalHapticFeedback.current
     val interaction = remember { MutableInteractionSource() }
     val pressed by interaction.collectIsPressedAsState()
+    val depth = 4.dp
+    val sink by animateDpAsState(if (pressed) depth - 1.dp else 0.dp, tween(60), label = "sink")
     Box(
         modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            .shadow(if (pressed) 1.dp else 5.dp, KeyShape, clip = false)
             .clip(KeyShape)
-            .background(if (pressed) lerp(color, p.label, 0.15f) else color)
+            .background(shade(color, -0.42f))
             .combinedClickable(
                 interactionSource = interaction,
                 indication = null,
@@ -164,14 +176,36 @@ private fun Key(
                     }
                 },
             ),
-        contentAlignment = Alignment.Center,
-    ) { content() }
+    ) {
+        Box(
+            Modifier
+                .fillMaxSize()
+                .padding(top = sink, bottom = depth - sink)
+                .clip(KeyShape)
+                .background(
+                    Brush.verticalGradient(
+                        if (pressed) listOf(shade(color, -0.08f), shade(color, -0.16f))
+                        else listOf(shade(color, 0.16f), color, shade(color, -0.10f)),
+                    ),
+                )
+                .border(
+                    1.dp,
+                    Brush.verticalGradient(listOf(Color.White.copy(alpha = 0.30f), Color.White.copy(alpha = 0.02f))),
+                    KeyShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) { content() }
+    }
 }
 
-private fun lerp(a: Color, b: Color, t: Float) = Color(
-    red = a.red + (b.red - a.red) * t,
-    green = a.green + (b.green - a.green) * t,
-    blue = a.blue + (b.blue - a.blue) * t,
-    alpha = 1f,
-)
-
+/** Lighter (amount > 0, towards white) or darker (amount < 0, towards black). */
+private fun shade(c: Color, amount: Float): Color {
+    val target = if (amount > 0) 1f else 0f
+    val t = kotlin.math.abs(amount)
+    return Color(
+        red = c.red + (target - c.red) * t,
+        green = c.green + (target - c.green) * t,
+        blue = c.blue + (target - c.blue) * t,
+        alpha = 1f,
+    )
+}
