@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -50,6 +51,8 @@ fun CurrencyPicker(
     suggested: List<String>,
     onPick: (String) -> Unit,
     onDismiss: () -> Unit,
+    /** Shown as "Remove from list" when the row can be removed. */
+    onRemove: (() -> Unit)? = null,
 ) {
     val p = LocalPalette.current
     var query by rememberSaveable { mutableStateOf("") }
@@ -68,7 +71,17 @@ fun CurrencyPicker(
         containerColor = p.background,
     ) {
         Column(Modifier.fillMaxHeight(0.92f).imePadding()) {
-            Text(title, color = p.label, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 20.dp))
+            Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), verticalAlignment = Alignment.CenterVertically) {
+                Text(title, color = p.label, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+                if (onRemove != null) {
+                    Text(
+                        "Remove from list",
+                        color = Color(0xFFFF3B30),
+                        fontSize = 15.sp,
+                        modifier = Modifier.clip(RoundedCornerShape(8.dp)).clickable(onClick = onRemove).padding(6.dp),
+                    )
+                }
+            }
             Row(
                 Modifier
                     .padding(horizontal = 16.dp, vertical = 12.dp)
