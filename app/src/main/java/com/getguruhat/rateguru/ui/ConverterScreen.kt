@@ -89,7 +89,9 @@ fun ConverterScreen(
                 // Rows stretch so the card fills the space above the keypad; past 84dp each
                 // they stop growing, and with many currencies they shrink to 56dp and scroll.
                 val addRow = if (state.codes.size < MAX_CURRENCIES) 52.dp else 0.dp
-                val rowHeight = ((maxHeight - addRow) / state.codes.size.coerceAtLeast(1)).coerceIn(56.dp, 84.dp)
+                // Leave room for the half-dp dividers (rounded up) so the card never overflows by a hair.
+                val dividers = (state.codes.size + 1).dp
+                val rowHeight = ((maxHeight - addRow - dividers) / state.codes.size.coerceAtLeast(1)).coerceIn(56.dp, 84.dp)
                 Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
                     Column(Modifier.clip(RoundedCornerShape(20.dp)).background(p.card)) {
                         state.codes.forEachIndexed { i, code ->
