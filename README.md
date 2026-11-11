@@ -16,6 +16,10 @@ A currency converter for travelers, with no ads. It works offline, needs no acco
 
 Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releases/latest/download/RateGuru.apk).
 
+## Support
+
+RateGuru is free and has no ads. If it saved you some mental math, [star the repo on GitHub](https://github.com/getguruhat/RateGuru) so other travelers can find it. Questions or ideas are welcome in [Issues](https://github.com/getguruhat/RateGuru/issues).
+
 ## Rates
 
 Mid-market rates, updated once a day, come from [Exchange Rate API](https://www.exchangerate-api.com) (open access). If it's down, the app uses a jsDelivr mirror of [fawazahmed0/exchange-api](https://github.com/fawazahmed0/exchange-api). Banks, cards and exchange booths add their own margin on top.
