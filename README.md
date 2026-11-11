@@ -18,7 +18,7 @@ Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releas
 
 ## Support
 
-RateGuru is free and has no ads. If it saved you some mental math, [star the repo on GitHub](https://github.com/getguruhat/RateGuru) so other travelers can find it. Questions or ideas are welcome in [Issues](https://github.com/getguruhat/RateGuru/issues).
+RateGuru is free and has no ads. If it saved you some mental math, [star the repo on GitHub](https://github.com/getguruhat/RateGuru) so other travelers can find it. Questions and ideas are welcome in [Discussions](https://github.com/getguruhat/RateGuru/discussions), and bugs go in [Issues](https://github.com/getguruhat/RateGuru/issues).
 
 ## Rates
 
