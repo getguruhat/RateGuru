@@ -1,0 +1,25 @@
+Categories:
+  - Money
+License: MIT
+WebSite: https://guruhat.com/apps/rateguru/
+SourceCode: https://github.com/getguruhat/RateGuru
+IssueTracker: https://github.com/getguruhat/RateGuru/issues
+
+AutoName: RateGuru
+
+RepoType: git
+Repo: https://github.com/getguruhat/RateGuru.git
+
+Builds:
+  - versionName: 0.1.15
+    versionCode: 115
+    commit: cef01ce230330900b6c3eae0e413abc63a7bff18
+    subdir: app
+    gradle:
+      - fdroid
+    prebuild: sed -i -e 's/"0.1.0"/"0.1.15"/' build.gradle.kts
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags ^v[0-9.]+$
+CurrentVersion: 0.1.15
+CurrentVersionCode: 115
