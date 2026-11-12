@@ -48,7 +48,7 @@ jobs:
 
       # The F-Droid flavor must keep compiling (it has no updater code).
       - name: Compile F-Droid flavor
-        run: ./gradlew assembleFdroidRelease --no-daemon
+        run: ./gradlew compileFdroidReleaseKotlin --no-daemon
 
       - name: Show signing certificate
         run: |
