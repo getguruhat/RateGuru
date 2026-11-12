@@ -1,0 +1,10 @@
+A currency converter for travelers, with no ads. It works offline, needs no account, and doesn't ask for location access.
+
+<ul>
+<li><b>Many currencies at once.</b> Up to 8 on one screen, all converting together. Tap any row to type in it, and tap a flag to change or remove that currency.</li>
+<li><b>Opens on the currency you need.</b> RateGuru picks the local currency from the mobile network and puts it at the top.</li>
+<li><b>Simple keypad.</b> Four rows, like a classic converter. The calculator key adds + - x / % for quick sums or a tip.</li>
+<li><b>Works offline.</b> It keeps the last rates it downloaded and ships with a snapshot of 166 currencies.</li>
+</ul>
+
+Mid-market rates, updated once a day, come from Exchange Rate API, with a mirror of fawazahmed0/exchange-api as a fallback. Banks, cards and exchange booths add their own margin on top.

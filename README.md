@@ -10,11 +10,11 @@ A currency converter for travelers, with no ads. It works offline, needs no acco
 - **Opens on the currency you need.** When you land somewhere new, RateGuru picks the local currency from the mobile network and puts it at the top.
 - **Simple keypad.** Four rows, like a classic converter. Tap the calculator key for + − × ÷ % (sums like `45000 × 3`, a tip with `+ 10%`). Hold 0 for 000, and hold ⌫ to clear.
 - **Works offline.** It keeps the last rates it downloaded, and ships with a snapshot of 166 currencies.
-- **Dark charcoal look with raised 3D keys**, and it updates itself from GitHub releases.
+- **Dark charcoal look with raised 3D keys**. The GitHub APK updates itself from GitHub releases.
 
 ## Download
 
-Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releases/latest/download/RateGuru.apk).
+Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releases/latest/download/RateGuru.apk), or install it from F-Droid once it is listed there.
 
 ## Support
 
@@ -26,7 +26,9 @@ Mid-market rates, updated once a day, come from [Exchange Rate API](https://www.
 
 ## Building
 
-Builds run on GitHub Actions only. Every push builds an APK. Pushing a `vX.Y.Z` tag publishes a signed release, and installed copies offer to update.
+Builds run on GitHub Actions only. Every push builds an APK. Pushing a `vX.Y.Z` tag publishes a signed release, and installed copies of the GitHub APK offer to update.
+
+There are two flavors. `github` is the signed release APK with the self-updater. `fdroid` has no updater and no install permission, and is what F-Droid builds (`./gradlew assembleFdroidRelease`).
 
 MIT licensed. Made by [GuruHat](https://guruhat.com).
 

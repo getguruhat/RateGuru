@@ -25,6 +25,13 @@ android {
         buildConfigField("String", "UPDATE_REPO", "\"getguruhat/RateGuru\"")
     }
 
+    // "github" self-updates from GitHub releases; "fdroid" has no updater (F-Droid ships updates).
+    flavorDimensions += "dist"
+    productFlavors {
+        create("github") { dimension = "dist" }
+        create("fdroid") { dimension = "dist" }
+    }
+
     // CI passes a permanent key (from GitHub secrets) so new builds install over old ones.
     // Without it, builds fall back to the throwaway debug key.
     val keystoreFile = System.getenv("RATEGURU_KEYSTORE_FILE")?.let(::file)?.takeIf { it.exists() }
