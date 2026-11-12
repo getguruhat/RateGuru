@@ -29,3 +29,5 @@ Mid-market rates, updated once a day, come from [Exchange Rate API](https://www.
 Builds run on GitHub Actions only. Every push builds an APK. Pushing a `vX.Y.Z` tag publishes a signed release, and installed copies offer to update.
 
 MIT licensed. Made by [GuruHat](https://guruhat.com).
+
+Guide: [How to convert currency while traveling, offline and without ads](https://guruhat.com/guides/currency-converter-offline-travel-android/). More at [guruhat.com/apps/rateguru](https://guruhat.com/apps/rateguru/).
