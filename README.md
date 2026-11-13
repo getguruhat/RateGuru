@@ -14,7 +14,7 @@ A currency converter for travelers, with no ads. It works offline, needs no acco
 
 ## Download
 
-Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releases/latest/download/RateGuru.apk), or install it from F-Droid once it is listed there.
+Get the latest APK from [Releases](https://github.com/getguruhat/RateGuru/releases/latest/download/RateGuru.apk), or add it to [Obtainium](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.getguruhat.rateguru%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fgetguruhat%2FRateGuru%22%2C%22author%22%3A%22getguruhat%22%2C%22name%22%3A%22RateGuru%22%7D) to get updates from GitHub releases.
 
 ## Support
 
